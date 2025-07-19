@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Copilot – Upcoming Events</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .sprinkler {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: radial-gradient(circle, #f59e0b 20%, transparent 70%);
+            border-radius: 50%;
+            animation: fall 6s linear infinite;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-30px); opacity: 0.9; }
+            100% { transform: translateY(100vh); opacity: 0.1; }
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+            border-left: 8px solid #f59e0b;
+            animation: fadeIn 0.7s ease-out;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            color: #1e3a8a;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
+            margin-bottom: 12px;
+        }
+
+        .tagline {
+            color: #4b5563;
+            font-size: 1.2rem;
+            font-weight: 400;
+        }
+
+        .events-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .events-header h2 {
+            color: #1f2937;
+            font-size: 1.6rem;
+            margin: 0;
+        }
+
+        .filter-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        select, .view-toggle {
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            background: #f9fafb;
+            font-size: 0.95rem;
+            color: #1f2937;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        select:focus, .view-toggle:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            outline: none;
+        }
+
+        .view-toggle {
+            background: linear-gradient(90deg, #6b7280, #4b5563);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+        }
+
+        .view-toggle:hover {
+            background: linear-gradient(90deg, #4b5563, #6b7280);
+            transform: translateY(-2px);
+        }
+
+        .view-toggle.active {
+            background: linear-gradient(90deg, #3b82f6, #2563eb);
+        }
+
+        button {
+            background: linear-gradient(90deg, #3b82f6, #2563eb);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(90deg, #2563eb, #3b82f6);
+        }
+
+        #eventList, #calendarView {
+            margin-top: 20px;
+        }
+
+        .event-item {
+            background: linear-gradient(145deg, #f9fafb, #ffffff);
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            border-left: 5px solid #f59e0b;
+        }
+
+        .event-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .event-details h3 {
+            margin: 0;
+            color: #1e3a8a;
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+
+        .event-type {
+            display: inline-block;
+            padding: 5px 14px;
+            border-radius: 14px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: white;
+            margin-right: 10px;
+        }
+
+        .days-until {
+            font-size: 0.9rem;
+            background: #dbeafe;
+            padding: 5px 14px;
+            border-radius: 14px;
+            color: #1e3a8a;
+            font-weight: 500;
+        }
+
+        .event-time {
+            font-size: 0.95rem;
+            color: #6b7280;
+            margin-top: 8px;
+        }
+
+        .event-actions button {
+            padding: 10px 20px;
+            font-size: 0.9rem;
+        }
+
+        .edit-btn {
+            background: linear-gradient(90deg, #3b82f6, #2563eb);
+        }
+
+        .edit-btn:hover {
+            background: linear-gradient(90deg, #2563eb, #3b82f6);
+        }
+
+        .delete-btn {
+            background: linear-gradient(90deg, #dc2626, #b91c1c);
+        }
+
+        .delete-btn:hover {
+            background: linear-gradient(90deg, #b91c1c, #dc2626);
+        }
+
+        .calendar-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .calendar-event {
+            background: #ffffff;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .calendar-event:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .no-events {
+            text-align: center;
+            color: #6b7280;
+            font-size: 1.1rem;
+            padding: 20px;
+            background: #f9fafb;
+            border-radius: 10px;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 20px;
+            }
+
+            .events-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+            .event-item, .calendar-event {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+
+            .event-actions {
+                align-self: flex-end;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+
+            button, select, .view-toggle {
+                width: 100%;
+                margin-bottom: 10px;
+            }
+
+            .filter-controls {
+                flex-direction: column;
+                width: 100%;
+            }
+
+            .calendar-view {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero">
+            <h1>Campus Copilot</h1>
+            <p class="tagline">Your upcoming events at a glance</p>
+        </div>
+        
+        <div class="events-header">
+            <h2>Your Events</h2>
+            <div class="filter-controls">
+                <select id="eventFilter">
+                    <option value="all">All Events</option>
+                    <option value="week">This Week</option>
+                    <option value="month">This Month</option>
+                    <option value="today">Today</option>
+                </select>
+                <button class="view-toggle active" id="listViewBtn" onclick="toggleView('list')">List View</button>
+                <button class="view-toggle" id="calendarViewBtn" onclick="toggleView('calendar')">Calendar View</button>
+                <button onclick="filterEvents()">Filter</button>
+            </div>
+        </div>
+        
+        <div id="eventList"></div>
+        <div id="calendarView" style="display: none;"></div>
+    </div>
+
+    <script>
+        let events = [];
+        let currentView = 'list';
+
+        function createSprinklers() {
+            const sprinklerCount = 50;
+            for (let i = 0; i < sprinklerCount; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'sprinkler';
+                dot.style.left = Math.random() * 100 + 'vw';
+                dot.style.top = -30 + 'px';
+                dot.style.animationDuration = (Math.random() * 5 + 3) + 's';
+                dot.style.opacity = Math.random() * 0.7 + 0.3;
+                dot.style.width = dot.style.height = (Math.random() * 10 + 5) + 'px';
+                document.body.appendChild(dot);
+            }
+        }
+
+        function loadEvents() {
+            const storedEvents = localStorage.getItem('events');
+            if (storedEvents) {
+                events = JSON.parse(storedEvents).map(event => ({
+                    ...event,
+                    date: new Date(event.date)
+                }));
+            }
+
+            const referenceEvent = {
+                id: 'eventeye-20250720',
+                name: 'EventEye',
+                type: 'Hackathon',
+                date: new Date('2025-07-20T12:59:00')
+            };
+
+            if (!events.some(event => event.id === referenceEvent.id)) {
+                events.push(referenceEvent);
+                localStorage.setItem('events', JSON.stringify(events));
+            }
+
+            filterEvents();
+        }
+
+        function displayEvents(filteredEvents = events) {
+            const eventList = document.getElementById('eventList');
+            const calendarView = document.getElementById('calendarView');
+            eventList.innerHTML = '';
+            calendarView.innerHTML = '';
+
+            if (filteredEvents.length === 0) {
+                const noEvents = document.createElement('div');
+                noEvents.className = 'no-events';
+                noEvents.textContent = 'No upcoming events found.';
+                if (currentView === 'list') {
+                    eventList.appendChild(noEvents);
+                } else {
+                    calendarView.appendChild(noEvents);
+                }
+                return;
+            }
+
+            filteredEvents.sort((a, b) => a.date - b.date);
+
+            if (currentView === 'list') {
+                eventList.style.display = 'block';
+                calendarView.style.display = 'none';
+                filteredEvents.forEach(event => {
+                    const now = new Date();
+                    const daysUntil = Math.floor((event.date - now) / (1000 * 60 * 60 * 24));
+                    const eventItem = document.createElement('div');
+                    eventItem.className = 'event-item';
+                    eventItem.innerHTML = `
+                        <div class="event-details">
+                            <h3>${event.name}</h3>
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <span class="event-type" style="background-color: ${getEventColor(event.type)};">
+                                    ${event.type}
+                                </span>
+                                <span class="days-until">
+                                    ${daysUntil} day${daysUntil === 1 ? '' : 's'} until
+                                </span>
+                            </div>
+                            <div class="event-time">${event.date.toLocaleString()}</div>
+                        </div>
+                        <div class="event-actions">
+                            <button class="edit-btn" onclick="editEvent('${event.id}')">Edit</button>
+                            <button class="delete-btn" onclick="deleteEvent('${event.id}')">Delete</button>
+                        </div>
+                    `;
+                    eventList.appendChild(eventItem);
+                });
+            } else {
+                eventList.style.display = 'none';
+                calendarView.style.display = 'grid';
+                filteredEvents.forEach(event => {
+                    const now = new Date();
+                    const daysUntil = Math.floor((event.date - now) / (1000 * 60 * 60 * 24));
+                    const eventItem = document.createElement('div');
+                    eventItem.className = 'calendar-event';
+                    eventItem.innerHTML = `
+                        <div class="event-details">
+                            <h3>${event.name}</h3>
+                            <div style="display: flex; gap: 12px; align-items: center;">
+                                <span class="event-type" style="background-color: ${getEventColor(event.type)};">
+                                    ${event.type}
+                                </span>
+                                <span class="days-until">
+                                    ${daysUntil} day${daysUntil === 1 ? '' : 's'} until
+                                </span>
+                            </div>
+                            <div class="event-time">${event.date.toLocaleDateString()}</div>
+                        </div>
+                        <div class="event-actions">
+                            <button class="edit-btn" onclick="editEvent('${event.id}')">Edit</button>
+                            <button class="delete-btn" onclick="deleteEvent('${event.id}')">Delete</button>
+                        </div>
+                    `;
+                    calendarView.appendChild(eventItem);
+                });
+            }
+        }
+
+        function filterEvents() {
+            const filterValue = document.getElementById('eventFilter').value;
+            const now = new Date();
+            let filteredEvents = [];
+
+            if (filterValue === 'today') {
+                const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+                const tomorrow = new Date(today);
+                tomorrow.setDate(today.getDate() + 1);
+                filteredEvents = events.filter(event => {
+                    return event.date >= today && event.date < tomorrow;
+                });
+            } else if (filterValue === 'week') {
+                const oneWeek = 7 * 24 * 60 * 60 * 1000;
+                filteredEvents = events.filter(event => {
+                    const timeDiff = event.date - now;
+                    return timeDiff > 0 && timeDiff <= oneWeek;
+                });
+            } else if (filterValue === 'month') {
+                const oneMonth = 30 * 24 * 60 * 60 * 1000;
+                filteredEvents = events.filter(event => {
+                    const timeDiff = event.date - now;
+                    return timeDiff > 0 && timeDiff <= oneMonth;
+                });
+            } else {
+                filteredEvents = events.filter(event => event.date > now);
+            }
+
+            displayEvents(filteredEvents);
+        }
+
+        function toggleView(view) {
+            currentView = view;
+            const listViewBtn = document.getElementById('listViewBtn');
+            const calendarViewBtn = document.getElementById('calendarViewBtn');
+            if (view === 'list') {
+                listViewBtn.classList.add('active');
+                calendarViewBtn.classList.remove('active');
+            } else {
+                calendarViewBtn.classList.add('active');
+                listViewBtn.classList.remove('active');
+            }
+            filterEvents();
+        }
+
+        function deleteEvent(id) {
+            events = events.filter(event => event.id !== id);
+            localStorage.setItem('events', JSON.stringify(events));
+            filterEvents();
+        }
+
+        function editEvent(id) {
+            const event = events.find(event => event.id === id);
+            if (event) {
+                localStorage.setItem('editEvent', JSON.stringify(event));
+                window.location.href = 'Edit.html';
+            }
+        }
+
+        function getEventColor(type) {
+            const colors = {
+                'Lecture': '#3b82f6',
+                'Exam': '#ef4444',
+                'Assignment': '#f59e0b',
+                'Club Event': '#10b981',
+                'Campus Notice': '#8b5cf6',
+                'Deadline': '#f97316',
+                'Personal Task': '#ec4899',
+                'Hackathon': '#d946ef'
+            };
+            return colors[type] || '#6b7280';
+        }
+
+        window.onload = () => {
+            createSprinklers();
+            loadEvents();
+            document.getElementById('listViewBtn').classList.add('active');
+        };
+    </script>
+</body>
+</html>

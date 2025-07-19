@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Campus Copilot – Your Personal College Assistant</title>
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #fef3c7 0%, #fed7aa 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .sprinkler {
+            position: fixed;
+            width: 8px;
+            height: 8px;
+            background: radial-gradient(circle, #f59e0b 0%, transparent 70%);
+            border-radius: 50%;
+            animation: fall 5s linear infinite;
+            z-index: -1;
+            pointer-events: none;
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(-20px); opacity: 0.8; }
+            100% { transform: translateY(100vh); opacity: 0.2; }
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-left: 6px solid #f59e0b;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .hero {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .hero h1 {
+            font-size: 2.5rem;
+            color: #1e3a8a;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            margin-bottom: 10px;
+        }
+
+        .tagline {
+            color: #4b5563;
+            font-size: 1.1rem;
+            font-weight: 400;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 8px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: #f9fafb;
+        }
+
+        input:focus, select:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            outline: none;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        button {
+            background: linear-gradient(90deg, #f59e0b, #d97706);
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+            background: linear-gradient(90deg, #d97706, #f59e0b);
+        }
+
+        .secondary-btn {
+            background: linear-gradient(90deg, #3b82f6, #2563eb);
+        }
+
+        .secondary-btn:hover {
+            background: linear-gradient(90deg, #2563eb, #3b82f6);
+        }
+
+        #reminderMessage {
+            color: #dc2626;
+            font-weight: 600;
+            margin-top: 15px;
+            padding: 10px;
+            background: #fef2f2;
+            border-radius: 8px;
+            display: none;
+            text-align: center;
+        }
+
+        #eventList {
+            margin-top: 20px;
+        }
+
+        .event-item {
+            background: #f9fafb;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            border-left: 4px solid #f59e0b;
+        }
+
+        .event-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .event-details h3 {
+            margin: 0;
+            color: #1e3a8a;
+            font-size: 1.2rem;
+        }
+
+        .event-type {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: white;
+        }
+
+        .event-time {
+            font-size: 0.9rem;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+
+        .event-actions button {
+            padding: 8px 16px;
+            font-size: 0.9rem;
+        }
+
+        .edit-btn {
+            background: linear-gradient(90deg, #3b82f6, #2563eb);
+        }
+
+        .edit-btn:hover {
+            background: linear-gradient(90deg, #2563eb, #3b82f6);
+        }
+
+        .delete-btn {
+            background: linear-gradient(90deg, #dc2626, #b91c1c);
+        }
+
+        .delete-btn:hover {
+            background: linear-gradient(90deg, #b91c1c, #dc2626);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-15px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+
+            .event-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .event-actions {
+                align-self: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="hero">
+            <h1>Campus Copilot</h1>
+            <p class="tagline">Never miss important deadlines, classes, or campus events again!</p>
+        </div>
+        <div class="form-group">
+            <label for="eventName">Event Name</label>
+            <input type="text" id="eventName" placeholder="Enter event name">
+        </div>
+        <div class="form-group">
+            <label for="eventType">Event Type</label>
+            <select id="eventType">
+                <option value="Lecture">Lecture</option>
+                <option value="Exam">Exam</option>
+                <option value="Assignment">Assignment</option>
+                <option value="Club Event">Club Event</option>
+                <option value="Campus Notice">Campus Notice</option>
+                <option value="Deadline">Deadline</option>
+                <option value="Personal Task">Personal Task</option>
+                <option value="Hackathon">Hackathon</option>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="eventDate">Date and Time</label>
+            <input type="datetime-local" id="eventDate">
+        </div>
+        <div class="button-group">
+            <button onclick="addEvent()">Add Event</button>
+            <button class="secondary-btn" onclick="window.location.href='Upcoming.html'">View Upcoming Events</button>
+        </div>
+        <div id="reminderMessage">Reminder: You have an upcoming event!</div>
+        <div id="eventList"></div>
+    </div>
+
+    <script>
+        let events = [];
+
+        function addEvent() {
+            const eventName = document.getElementById('eventName').value;
+            const eventType = document.getElementById('eventType').value;
+            const eventDate = document.getElementById('eventDate').value;
+
+            if (!eventName || !eventDate) {
+                alert('Please fill in all fields.');
+                return;
+            }
+
+            const event = {
+                id: Date.now(),
+                name: eventName,
+                type: eventType,
+                date: new Date(eventDate)
+            };
+
+            events.push(event);
+            saveEvents();
+            displayEvents();
+            checkReminders();
+            clearForm();
+        }
+
+        function displayEvents() {
+            const eventList = document.getElementById('eventList');
+            eventList.innerHTML = '';
+
+            events.sort((a, b) => a.date - b.date);
+
+            events.forEach(event => {
+                const eventItem = document.createElement('div');
+                eventItem.className = 'event-item';
+                eventItem.innerHTML = `
+                    <div class="event-details">
+                        <h3>${event.name}</h3>
+                        <span class="event-type" style="background-color: ${getEventColor(event.type)};">
+                            ${event.type}
+                        </span>
+                        <div class="event-time">${event.date.toLocaleString()}</div>
+                    </div>
+                    <div class="event-actions">
+                        <button class="edit-btn" onclick="editEvent(${event.id})">Edit</button>
+                        <button class="delete-btn" onclick="deleteEvent(${event.id})">Delete</button>
+                    </div>
+                `;
+                eventList.appendChild(eventItem);
+            });
+        }
+
+        function deleteEvent(id) {
+            events = events.filter(event => event.id !== id);
+            saveEvents();
+            displayEvents();
+            checkReminders();
+        }
+
+        function saveEvents() {
+            localStorage.setItem('events', JSON.stringify(events));
+        }
+
+        function loadEvents() {
+            const storedEvents = localStorage.getItem('events');
+            if (storedEvents) {
+                events = JSON.parse(storedEvents).map(event => ({
+                    ...event,
+                    date: new Date(event.date)
+                }));
+                displayEvents();
+                checkReminders();
+            }
+        }
+
+        function checkReminders() {
+            const now = new Date();
+            const reminderMessage = document.getElementById('reminderMessage');
+            const upcomingEvents = events.filter(event => {
+                const timeDiff = event.date - now;
+                return timeDiff > 0 && timeDiff <= 24 * 60 * 60 * 1000;
+            });
+
+            if (upcomingEvents.length > 0) {
+                reminderMessage.style.display = 'block';
+            } else {
+                reminderMessage.style.display = 'none';
+            }
+        }
+
+        function getEventColor(type) {
+            const colors = {
+                'Lecture': '#3b82f6',
+                'Exam': '#ef4444',
+                'Assignment': '#f59e0b',
+                'Club Event': '#10b981',
+                'Campus Notice': '#8b5cf6',
+                'Deadline': '#f97316',
+                'Personal Task': '#ec4899',
+                'Hackathon': '#d946ef'
+            };
+            return colors[type] || '#6b7280';
+        }
+
+        function clearForm() {
+            document.getElementById('eventName').value = '';
+            document.getElementById('eventType').value = 'Lecture';
+            document.getElementById('eventDate').value = '';
+        }
+
+        function createSprinklers() {
+            const sprinklerCount = 40;
+            for (let i = 0; i < sprinklerCount; i++) {
+                const dot = document.createElement('div');
+                dot.className = 'sprinkler';
+                dot.style.left = Math.random() * 100 + 'vw';
+                dot.style.top = -20 + 'px';
+                dot.style.animationDuration = (Math.random() * 4 + 3) + 's';
+                dot.style.opacity = Math.random() * 0.6 + 0.4;
+                dot.style.width = dot.style.height = (Math.random() * 8 + 4) + 'px';
+                document.body.appendChild(dot);
+            }
+        }
+
+        window.onload = () => {
+            loadEvents();
+            setInterval(checkReminders, 60000);
+            createSprinklers();
+        };
+    </script>
+</body>
+</html>
